@@ -1,0 +1,6 @@
+{
+  "name": "JBS Prod",
+  "description": "Label de production musicale, enregistrement studio, promotion et management d'artistes à Kinshasa.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
