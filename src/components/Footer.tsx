@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
-import { Phone, Mail, MapPin, CheckCircle, Disc3 } from 'lucide-react';
+import { Phone, Mail, MapPin, CheckCircle, Disc3, ShieldCheck } from 'lucide-react';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenAdminModal?: () => void;
+  unreadCount?: number;
+}
+
+export const Footer: React.FC<FooterProps> = ({
+  onOpenAdminModal,
+  unreadCount = 0,
+}) => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
@@ -100,6 +108,11 @@ export const Footer: React.FC = () => {
                 </a>
               </li>
               <li>
+                <a href="#temoignages" className="text-neutral-400 hover:text-orange-400 transition-colors">
+                  Témoignages & Success Stories
+                </a>
+              </li>
+              <li>
                 <a href="#galerie" className="text-neutral-400 hover:text-orange-400 transition-colors">
                   Galerie Photos & Vidéos
                 </a>
@@ -114,6 +127,22 @@ export const Footer: React.FC = () => {
                   FAQ & Questions Fréquentes
                 </a>
               </li>
+              {onOpenAdminModal && (
+                <li className="pt-2">
+                  <button
+                    onClick={onOpenAdminModal}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-400 hover:text-orange-300 transition-colors cursor-pointer bg-neutral-900/80 px-2.5 py-1.5 rounded-lg border border-neutral-800"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Espace Admin Studio</span>
+                    {unreadCount > 0 && (
+                      <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full animate-pulse">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
 

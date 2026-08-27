@@ -27,6 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { label: 'Accueil', href: '#accueil' },
     { label: 'Nos Services', href: '#services' },
     { label: 'Artistes', href: '#artistes' },
+    { label: 'Témoignages', href: '#temoignages' },
     { label: 'Galerie', href: '#galerie' },
     { label: 'Nous Rejoindre', href: '#candidature' },
     { label: 'FAQ', href: '#faq' },
@@ -75,14 +76,33 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             id="admin-dashboard-btn"
             onClick={onOpenAdminModal}
-            title="Espace Candidatures & Gestion"
-            className="relative p-2 text-neutral-400 hover:text-white hover:bg-neutral-800/60 rounded-full transition-colors text-xs flex items-center gap-1.5 border border-neutral-800"
+            title={
+              pendingApplicationsCount > 0
+                ? `Espace Gestion Studio • ${pendingApplicationsCount} nouvelle(s) candidature(s) non lue(s)`
+                : 'Espace Gestion Studio, Artistes, Morceaux & Photos'
+            }
+            className={`relative px-3.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white rounded-xl transition-all text-xs flex items-center gap-2 cursor-pointer shadow-sm ${
+              pendingApplicationsCount > 0
+                ? 'border border-orange-500/70 shadow-orange-500/20 bg-neutral-900/95 ring-1 ring-orange-500/30'
+                : 'border border-neutral-700/80'
+            }`}
           >
-            <ShieldAlert className="w-4 h-4 text-orange-400" />
-            <span className="font-medium text-neutral-300">Gestion</span>
+            <div className="relative flex items-center justify-center">
+              <ShieldAlert className={`w-4 h-4 ${pendingApplicationsCount > 0 ? 'text-orange-400' : 'text-orange-500'}`} />
+              {pendingApplicationsCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+              )}
+            </div>
+
+            <span className="font-bold text-white">Gestion Studio</span>
+
             {pendingApplicationsCount > 0 && (
-              <span className="bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">
-                {pendingApplicationsCount}
+              <span className="bg-gradient-to-r from-red-600 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md shadow-red-500/30 flex items-center gap-1 animate-pulse">
+                <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                <span>{pendingApplicationsCount} non lu{pendingApplicationsCount > 1 ? 's' : ''}</span>
               </span>
             )}
           </button>
@@ -100,12 +120,20 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex md:hidden items-center gap-2">
           <button
             onClick={onOpenAdminModal}
-            className="relative p-2 text-neutral-300 bg-neutral-900 border border-neutral-800 rounded-lg text-xs"
-            title="Admin"
+            className={`relative p-2.5 text-neutral-300 bg-neutral-900 rounded-xl text-xs transition-all cursor-pointer ${
+              pendingApplicationsCount > 0
+                ? 'border border-orange-500/70 shadow-lg shadow-orange-500/20'
+                : 'border border-neutral-800'
+            }`}
+            title={
+              pendingApplicationsCount > 0
+                ? `${pendingApplicationsCount} nouvelle(s) candidature(s) non lue(s)`
+                : 'Gestion Studio Admin'
+            }
           >
             <ShieldAlert className="w-4 h-4 text-orange-400" />
             {pendingApplicationsCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+              <span className="absolute -top-1.5 -right-1.5 min-w-[19px] h-[19px] px-1 bg-gradient-to-r from-red-600 to-orange-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-black shadow-md shadow-red-500/40 animate-pulse">
                 {pendingApplicationsCount}
               </span>
             )}
@@ -141,6 +169,24 @@ export const Navbar: React.FC<NavbarProps> = ({
             ))}
 
             <div className="pt-2 flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenAdminModal();
+                }}
+                className="w-full flex items-center justify-between px-4 py-3 bg-neutral-900 border border-neutral-700 text-white font-bold rounded-lg transition-all"
+              >
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-orange-500" />
+                  <span>Gestion Studio & Admin</span>
+                </div>
+                {pendingApplicationsCount > 0 && (
+                  <span className="bg-gradient-to-r from-red-600 to-orange-500 text-white text-xs font-black px-2.5 py-0.5 rounded-full animate-pulse shadow-md">
+                    {pendingApplicationsCount} non lue{pendingApplicationsCount > 1 ? 's' : ''}
+                  </span>
+                )}
+              </button>
+
               <a
                 href="#candidature"
                 onClick={() => setMobileMenuOpen(false)}

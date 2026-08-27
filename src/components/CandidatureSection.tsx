@@ -53,6 +53,7 @@ export const CandidatureSection: React.FC<CandidatureSectionProps> = ({
         year: 'numeric',
       }),
       status: 'nouveau',
+      isRead: false,
     };
 
     setTimeout(() => {

@@ -3,20 +3,101 @@ import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { ServicesSection } from './components/ServicesSection';
 import { ArtistsSection } from './components/ArtistsSection';
+import { TestimonialsSection } from './components/TestimonialsSection';
 import { GallerySection } from './components/GallerySection';
 import { CandidatureSection } from './components/CandidatureSection';
 import { FaqSection } from './components/FaqSection';
 import { Footer } from './components/Footer';
 import { AudioPlayerBar } from './components/AudioPlayerBar';
 import { ProjectProposalModal } from './components/ProjectProposalModal';
-import { AdminPanelModal } from './components/AdminPanelModal';
+import { AdminStudioManagerModal } from './components/AdminStudioManagerModal';
 import { WhatsAppFloatingButton } from './components/WhatsAppFloatingButton';
-import { CandidatureData, GalleryItem } from './types';
+import { CandidatureData, GalleryItem, Artist, Track } from './types';
 import { audioPreviewEngine } from './utils/audioSynth';
 import { DEMO_TRACKS, ARTISTS } from './data/artists';
 import { INITIAL_GALLERY_ITEMS } from './data/gallery';
 
 export default function App() {
+  // Artists State with localStorage persistence
+  const [artists, setArtists] = useState<Artist[]>(() => {
+    const saved = localStorage.getItem('jbs_studio_artists');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch {
+        // fallback
+      }
+    }
+    return ARTISTS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('jbs_studio_artists', JSON.stringify(artists));
+  }, [artists]);
+
+  const handleAddArtist = (newArtist: Artist) => {
+    setArtists((prev) => [newArtist, ...prev]);
+  };
+
+  const handleUpdateArtist = (updatedArtist: Artist) => {
+    setArtists((prev) =>
+      prev.map((a) => (a.id === updatedArtist.id ? updatedArtist : a))
+    );
+  };
+
+  const handleDeleteArtist = (id: string) => {
+    setArtists((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  const handleResetArtists = () => {
+    if (window.confirm('Voulez-vous réinitialiser la liste des artistes avec les artistes par défaut ?')) {
+      setArtists(ARTISTS);
+    }
+  };
+
+  // Demo Tracks / Songs State with localStorage persistence
+  const [tracks, setTracks] = useState<Track[]>(() => {
+    const saved = localStorage.getItem('jbs_studio_tracks');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch {
+        // fallback
+      }
+    }
+    return DEMO_TRACKS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('jbs_studio_tracks', JSON.stringify(tracks));
+  }, [tracks]);
+
+  const handleAddTrack = (newTrack: Track) => {
+    setTracks((prev) => [newTrack, ...prev]);
+  };
+
+  const handleUpdateTrack = (updatedTrack: Track) => {
+    setTracks((prev) =>
+      prev.map((t) => (t.id === updatedTrack.id ? updatedTrack : t))
+    );
+  };
+
+  const handleDeleteTrack = (id: string) => {
+    setTracks((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const handleResetTracks = () => {
+    if (window.confirm('Voulez-vous réinitialiser les chansons par défaut ?')) {
+      setTracks(DEMO_TRACKS);
+    }
+  };
+
   // Application / Candidatures State
   const [candidatures, setCandidatures] = useState<CandidatureData[]>(() => {
     const saved = localStorage.getItem('jbs_candidatures');
@@ -168,7 +249,21 @@ export default function App() {
     setCandidatures((prev) => prev.filter((c) => c.id !== id));
   };
 
-  const pendingCount = candidatures.filter((c) => c.status === 'nouveau').length;
+  const handleMarkCandidatureAsRead = (id: string, isRead: boolean) => {
+    setCandidatures((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, isRead } : c))
+    );
+  };
+
+  const handleMarkAllCandidaturesAsRead = () => {
+    setCandidatures((prev) =>
+      prev.map((c) => ({ ...c, isRead: true }))
+    );
+  };
+
+  const unreadCount = candidatures.filter(
+    (c) => c.isRead === false || (c.isRead === undefined && c.status === 'nouveau')
+  ).length;
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-orange-500 selection:text-white flex flex-col font-sans">
@@ -176,7 +271,7 @@ export default function App() {
       <Navbar
         onOpenProjectModal={() => setIsProjectModalOpen(true)}
         onOpenAdminModal={() => setIsAdminModalOpen(true)}
-        pendingApplicationsCount={pendingCount}
+        pendingApplicationsCount={unreadCount}
       />
 
       {/* Hero Section */}
@@ -191,9 +286,16 @@ export default function App() {
 
         {/* Artists Showcase Section */}
         <ArtistsSection
+          artists={artists}
           currentPlayingTrackId={currentPlayingTrack?.id || null}
           isPlaying={isPlaying}
           onTogglePlayTrack={handleTogglePlayTrack}
+          onOpenAddArtist={() => setIsAdminModalOpen(true)}
+        />
+
+        {/* Success Stories & Testimonials Section */}
+        <TestimonialsSection
+          onOpenProjectModal={() => setIsProjectModalOpen(true)}
         />
 
         {/* Media Gallery Section (Photos & Videos) */}
@@ -215,7 +317,10 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer
+        onOpenAdminModal={() => setIsAdminModalOpen(true)}
+        unreadCount={unreadCount}
+      />
 
       {/* Persistent / Floating Audio Player Bar */}
       {currentPlayingTrack && (
@@ -250,13 +355,29 @@ export default function App() {
         onSubmitProposal={handleAddCandidature}
       />
 
-      {/* Admin Candidatures Management Modal */}
-      <AdminPanelModal
+      {/* Full Studio Management Modal (Artists, Tracks, Gallery, Candidatures) */}
+      <AdminStudioManagerModal
         isOpen={isAdminModalOpen}
         onClose={() => setIsAdminModalOpen(false)}
+        artists={artists}
+        onAddArtist={handleAddArtist}
+        onUpdateArtist={handleUpdateArtist}
+        onDeleteArtist={handleDeleteArtist}
+        onResetArtists={handleResetArtists}
+        tracks={tracks}
+        onAddTrack={handleAddTrack}
+        onUpdateTrack={handleUpdateTrack}
+        onDeleteTrack={handleDeleteTrack}
+        onResetTracks={handleResetTracks}
+        galleryItems={galleryItems}
+        onAddGalleryItem={handleAddMedia}
+        onDeleteGalleryItem={handleDeleteMedia}
+        onResetGallery={handleResetDefaultGallery}
         candidatures={candidatures}
-        onUpdateStatus={handleUpdateStatus}
+        onUpdateCandidatureStatus={handleUpdateStatus}
         onDeleteCandidature={handleDeleteCandidature}
+        onMarkCandidatureAsRead={handleMarkCandidatureAsRead}
+        onMarkAllCandidaturesAsRead={handleMarkAllCandidaturesAsRead}
       />
     </div>
   );

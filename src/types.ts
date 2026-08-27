@@ -1,3 +1,30 @@
+export interface ArtistPhoto {
+  id: string;
+  url: string;
+  title?: string;
+  caption?: string;
+  date?: string;
+}
+
+export interface ArtistVideo {
+  id: string;
+  url: string;
+  title: string;
+  type?: 'clip' | 'live' | 'studio' | 'teaser';
+  duration?: string;
+  views?: string;
+  date?: string;
+}
+
+export interface ArtistRelease {
+  id: string;
+  title: string;
+  type: 'Single' | 'EP' | 'Album';
+  year: string;
+  streams?: string;
+  coverUrl?: string;
+}
+
 export interface Artist {
   id: string;
   name: string;
@@ -16,6 +43,12 @@ export interface Artist {
   appleMusicUrl: string;
   youtubeUrl: string;
   instagramUrl?: string;
+  // Base de données médias propre à chaque artiste
+  photos?: ArtistPhoto[];
+  videos?: ArtistVideo[];
+  discography?: ArtistRelease[];
+  bookingContact?: string;
+  pressKitBio?: string;
 }
 
 export interface ServiceItem {
@@ -39,6 +72,7 @@ export interface CandidatureData {
   message: string;
   createdAt: string;
   status: 'nouveau' | 'en_etude' | 'retenu' | 'archive';
+  isRead?: boolean;
 }
 
 export interface Track {

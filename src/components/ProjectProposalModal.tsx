@@ -47,6 +47,7 @@ export const ProjectProposalModal: React.FC<ProjectProposalModalProps> = ({
       message: details || 'Projet soumis via l\'assistant de proposition.',
       createdAt: new Date().toLocaleDateString('fr-FR'),
       status: 'nouveau',
+      isRead: false,
     };
     onSubmitProposal(newCand);
     setSubmitted(true);
